@@ -1,8 +1,9 @@
 1. GraphQL
 2. Django queryset love
-2. __getattr__ abuse
-3. ???
-4. Profit!!!
+3. __getattr__ abuse
+4. ???
+5. Profit!!!
+
 
 What
 ----
