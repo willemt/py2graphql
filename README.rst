@@ -1,17 +1,23 @@
 1. GraphQL
+2. Django queryset love
 2. __getattr__ abuse
 3. ???
 4. Profit!!!
 
+What
+----
+py2graphql is a Python GraphQL client that makes GraphQL feel better to use. It almost feels like you're using Django's ORM.
+
 Example
 -------
 
-The following Python equates to the preceding GraphQL
+This Python equates to the following GraphQL.
 
 .. code-block:: python
    :class: ignore
 
-   query = Query().repository(owner='juliuscaeser', name='rome').pullRequest(number=2).values('title', 'url').commits(last=250).edges.node.commit.values('id', 'message', 'messageBody')
+   from py2graphql import Query
+   Query().repository(owner='juliuscaeser', name='rome').pullRequest(number=2).values('title', 'url').commits(last=250).edges.node.commit.values('id', 'message', 'messageBody')
 
 .. code-block:: graphql
    :class: ignore
@@ -41,6 +47,7 @@ You can even use the library to do the HTTP requests:
 .. code-block:: python
    :class: ignore
 
+   from py2graphql import Client
    headers = {
        'Authorization': 'token MY_TOKEN',
    }
