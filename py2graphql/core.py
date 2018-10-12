@@ -93,9 +93,19 @@ class Query(object):
             'query': graphql
         }
         r = requests.post(client.url, json.dumps(body), headers=client.headers)
+
         if r.status_code != 200:
             raise Exception(r.content)
-        return addict.Dict(json.loads(r.content)['data'])
+
+        response_content = json.loads(r.content)
+        data = response_content['data']
+        errors = response_content.get('errors')
+
+        result_dict = addict.Dict(data)
+        if errors is not None:
+            result_dict.update(_errors=errors)
+
+        return result_dict
 
 
 class Client(object):
