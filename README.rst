@@ -30,6 +30,7 @@ This Python equates to the following GraphQL.
    :class: ignore
 
    from py2graphql import Query
+
    Query().repository(owner='juliuscaeser', name='rome').pullRequest(number=2).values('title', 'url').commits(last=250).edges.node.commit.values('id', 'message', 'messageBody')
 
 .. code-block:: graphql
