@@ -38,7 +38,7 @@ setup(
     ],
     keywords='development',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['addict'],
+    install_requires=['addict', 'requests'],
     package_data={},
     data_files=[],
     entry_points={},
