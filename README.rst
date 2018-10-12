@@ -12,6 +12,15 @@ What
 ----
 py2graphql is a Python GraphQL client that makes GraphQL feel better to use. It almost feels like you're using Django's ORM.
 
+
+Installation
+------------
+.. code-block:: bash
+   :class: ignore
+
+   pip install py2graphql
+
+
 Example
 -------
 
@@ -52,16 +61,8 @@ You can even use the library to do the HTTP requests:
    :class: ignore
 
    from py2graphql import Client
+
    headers = {
        'Authorization': 'token MY_TOKEN',
    }
    Client(url=THE_URL, headers=headers).query().repository(owner='juliuscaeser', name='rome').fetch()
-
-Installation
-------------
-.. code-block:: bash
-   :class: ignore
-
-   pip install py2graphql
-
-
