@@ -67,3 +67,51 @@ You can even use the library to do the HTTP requests:
        'Authorization': 'token MY_TOKEN',
    }
    Client(url=THE_URL, headers=headers).query().repository(owner='juliuscaeser', name='rome').fetch()
+
+It also supports Mutations:
+
+.. code-block:: python
+   :class: ignore
+
+   from py2graphql import Client, Query
+
+   headers = {
+       'Authorization': 'token MY_TOKEN',
+   }
+   client = Client(url=THE_URL, headers=headers)
+   mutation = Query(name='mutation', client=client)
+
+
+And multiple queries in a single request:
+
+.. code-block:: python
+   :class: ignore
+
+   from py2graphql import Client, Query
+
+   headers = {
+       'Authorization': 'token MY_TOKEN',
+   }
+   query = Client(url=THE_URL, headers=headers).query().repository(owner='juliuscaeser', name='rome')
+   query.pullRequest(number=2).values('title', 'url')
+   query.releases(first=10).edges.node.values('name')
+   query.get_graphql()
+
+.. code-block:: graphql
+   :class: ignore
+
+   query {
+     repository(owner: "juliuscaeser", name: "rome") {
+        pullRequest(number: 2) {
+          title
+          url
+        }
+        releases(first: 10) {
+          edges {
+            node {
+              name
+            }
+          }
+        }
+      }
+   }
