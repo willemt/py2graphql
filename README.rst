@@ -115,3 +115,17 @@ And multiple queries in a single request:
         }
       }
    }
+
+As well as GraphQL errors:
+
+.. code-block:: python
+   :class: ignore
+
+   from py2graphql import Client, Query
+
+   headers = {
+       'Authorization': 'token MY_TOKEN',
+   }
+   result = Client(url=THE_URL, headers=headers).query().repository(owner='juliuscaeser', name='rome').fetch()
+   result._errors
+   [{'message': "Field 'repository' is missing required arguments: name", 'locations': [{'line': 7, 'column': 3}]}]
