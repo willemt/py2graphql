@@ -1,10 +1,9 @@
-##########
 Py2graphql
 ##########
 
 1. GraphQL
 2. Django queryset love
-3. __getattr__ abuse
+3. ``__getattr__`` abuse
 4. ???
 5. Profit!!!
 
