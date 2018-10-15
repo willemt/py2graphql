@@ -1,6 +1,8 @@
 Py2graphql
 ##########
 
+|pypi|
+
 1. GraphQL
 2. Django queryset love
 3. ``__getattr__`` abuse
@@ -129,3 +131,7 @@ As well as GraphQL errors:
    result = Client(url=THE_URL, headers=headers).query().repository(owner='juliuscaeser', name='rome').fetch()
    result._errors
    [{'message': "Field 'repository' is missing required arguments: name", 'locations': [{'line': 7, 'column': 3}]}]
+
+
+.. |pypi| image:: https://img.shields.io/pypi/v/py2graphql.svg?style=flat
+   :target: https://pypi.python.org/pypi/gql
