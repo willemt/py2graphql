@@ -8,7 +8,9 @@ here = path.abspath(path.dirname(__file__))
 
 def long_description():
     with codecs.open('README.rst', encoding='utf8') as f:
-        return f.read()
+        description = f.read()
+        # Remove graphql specifiers to prevent rst failing to render on pypi
+        return description.replace('.. code-block:: graphql', '.. code-block::')
 
 
 setup(
