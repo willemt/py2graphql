@@ -134,4 +134,4 @@ As well as GraphQL errors:
 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/py2graphql.svg?style=flat
-   :target: https://pypi.python.org/pypi/gql
+   :target: https://pypi.python.org/pypi/py2graphql
