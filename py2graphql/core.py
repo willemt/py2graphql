@@ -51,6 +51,13 @@ class Query(object):
         operation_name=None,
         operation_variables=[],
     ):
+        """
+        Kwargs:
+           name (str): Client used for sending queries.
+           client: Client used for sending queries.
+           parent (Query): Query that calls this query.
+       """
+
         self._operation_type = operation_type
         self._nodes = []
         self._call_args = None
@@ -193,10 +200,17 @@ class Query(object):
         errors = response_content.get("errors")
 
         result_dict = addict.Dict(data)
+
         if errors is not None:
-            result_dict.update(_errors=errors)
+            raise GraphQLError(json.loads(r.content))
 
         return result_dict
+
+    def __str__(self):
+        return self.to_graphql()
+
+    def __iter__(self):
+        return self.fetch().items()
 
 
 class Mutation(Query):
