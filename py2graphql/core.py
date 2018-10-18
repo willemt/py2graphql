@@ -1,3 +1,5 @@
+import numbers
+
 import addict
 import json
 import requests
@@ -39,7 +41,9 @@ class Query(object):
             nl = '\n'
 
         def serialize_arg(arg):
-            if isinstance(arg, int):
+            if isinstance(arg, bool):
+                return 'true' if arg else 'false'
+            elif isinstance(arg, numbers.Number):
                 return str(arg)
             else:
                 return '"{0}"'.format(arg)
