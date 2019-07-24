@@ -1,0 +1,8 @@
+language: python
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
+script:
+  - python3 test_py2graphql.py
