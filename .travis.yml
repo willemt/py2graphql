@@ -4,5 +4,7 @@ addons:
     packages:
       - "python3"
       - "python3-pip"
+install:
+  - pip3 install addict
 script:
   - python3 test_py2graphql.py
