@@ -1,8 +1,23 @@
+import json
 import numbers
 
 import addict
-import json
+
 import requests
+
+
+class GraphQLError(Exception):
+    """GraphQL endpoint responded with a GraphQL error"""
+    def __init__(self, response):
+        self.response = response
+        super().__init__(response)
+
+
+class GraphQLEndpointError(Exception):
+    """GraphQL endpoint didn't respond with a JSON object"""
+    def __init__(self, response):
+        self.response = response
+        super().__init__(response)
 
 
 class Query(object):
@@ -89,6 +104,9 @@ class Query(object):
         else:
             return self
 
+    def __getitem__(self, x):
+        return getattr(self.fetch(), x)
+
     def fetch(self):
         root = self._get_root()
         client = root._client
@@ -99,7 +117,10 @@ class Query(object):
         r = requests.post(client.url, json.dumps(body), headers=client.headers)
 
         if r.status_code != 200:
-            raise Exception(r.content)
+            try:
+                raise GraphQLError(json.loads(r.content))
+            except json.JSONDecodeError:
+                raise GraphQLEndpointError(r.content)
 
         response_content = json.loads(r.content)
         data = response_content['data']
