@@ -133,6 +133,11 @@ class Query(object):
         return result_dict
 
 
+class Mutation(Query):
+    def __init__(self, name='mutation', **kwargs):
+        super(Mutation, self).__init__(name=name, **kwargs)
+
+
 class Client(object):
     def __init__(self, url, headers):
         self.url = url
