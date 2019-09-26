@@ -4,4 +4,5 @@ from .core import (
     GraphQLEndpointError,
     Mutation,
     Query,
+    Variable,
 )

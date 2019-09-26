@@ -36,9 +36,21 @@ class Py2GraphqlTests(unittest.TestCase):
             'query {repository(owner: "juliuscaeser", test: 10.0) {title url}}',
         )
 
+    def test_list(self):
+        self.assertEqual(
+            Query().repository(owner='juliuscaeser', test=[]).values('title', 'url').to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", test: []) {title url}}',
+        )
+
+    def test_list_with_contents(self):
+        self.assertEqual(
+            Query().repository(owner='juliuscaeser', test=[1]).values('title', 'url').to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", test: [1]) {title url}}',
+        )
+
     def test_mutation_boolean(self):
         self.assertEqual(
-            Query(name='mutation').repository(owner='juliuscaeser', isAdmin=True).values('title', 'url').to_graphql(indentation=0),
+            Query(operation_type='mutation').repository(owner='juliuscaeser', isAdmin=True).values('title', 'url').to_graphql(indentation=0),
             'mutation {repository(owner: "juliuscaeser", isAdmin: true) {title url}}',
         )
 
