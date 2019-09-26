@@ -6,8 +6,17 @@ def test_simple():
 
 
 def test_medium():
-    query = Query().repository(owner='juliuscaeser', name='rome').pullRequest(number=2).values('title', 'url').commits(last=250).edges.node.commit.values('id', 'message', 'messageBody')
-    assert query.to_graphql() == """
+    query = (
+        Query()
+        .repository(owner="juliuscaeser", name="rome")
+        .pullRequest(number=2)
+        .values("title", "url")
+        .commits(last=250)
+        .edges.node.commit.values("id", "message", "messageBody")
+    )
+    assert (
+        query.to_graphql()
+        == """
 query {
   repository(owner: "juliuscaeser", name: "rome") {
     pullRequest(number: 2) {
@@ -28,3 +37,4 @@ query {
   }
 }
     """.strip()
+    )
