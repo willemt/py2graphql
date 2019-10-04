@@ -81,6 +81,12 @@ class Query(object):
                 return "${}".format(arg.name)
             elif isinstance(arg, list):
                 return "[{}]".format(", ".join(map(serialize_arg, arg)))
+            elif isinstance(arg, dict):
+                return "{{{}}}".format(
+                    ", ".join(
+                        ["{}: {}".format(k, serialize_arg(v)) for k, v in arg.items()]
+                    )
+                )
             else:
                 return f'"{arg}"'
 
