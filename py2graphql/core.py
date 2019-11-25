@@ -27,6 +27,11 @@ class Variable(object):
         self.name = name
 
 
+class Literal(object):
+    def __init__(self, name):
+        self.name = name
+
+
 class Query(object):
     """
     Construct a GraphQL query
@@ -79,6 +84,8 @@ class Query(object):
                 return "null"
             elif isinstance(arg, numbers.Number):
                 return str(arg)
+            elif isinstance(arg, Literal):
+                return arg.name
             elif isinstance(arg, Variable):
                 return "${}".format(arg.name)
             elif isinstance(arg, list):

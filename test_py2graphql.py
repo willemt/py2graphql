@@ -3,7 +3,7 @@ import unittest
 
 import mock
 
-from py2graphql import Client, GraphQLEndpointError, GraphQLError, Query
+from py2graphql import Client, GraphQLEndpointError, GraphQLError, Literal, Query
 
 
 class Py2GraphqlTests(unittest.TestCase):
@@ -32,6 +32,15 @@ class Py2GraphqlTests(unittest.TestCase):
             .values("title", "url")
             .to_graphql(indentation=0),
             'query {repository(owner: "juliuscaeser", test: null) {title url}}',
+        )
+
+    def test_literal(self):
+        self.assertEqual(
+            Query()
+            .repository(owner="juliuscaeser", orderBy=Literal("age_ASC"))
+            .values("title", "url")
+            .to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", orderBy: age_ASC) {title url}}',
         )
 
     def test_number(self):
