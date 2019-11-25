@@ -25,6 +25,15 @@ class Py2GraphqlTests(unittest.TestCase):
             'query {repository(owner: "juliuscaeser", test: true) {title url}}',
         )
 
+    def test_none(self):
+        self.assertEqual(
+            Query()
+            .repository(owner="juliuscaeser", test=None)
+            .values("title", "url")
+            .to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", test: null) {title url}}',
+        )
+
     def test_number(self):
         self.assertEqual(
             Query()

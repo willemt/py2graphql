@@ -75,6 +75,8 @@ class Query(object):
         def serialize_arg(arg):
             if isinstance(arg, bool):
                 return "true" if arg else "false"
+            if isinstance(arg, type(None)):
+                return "null"
             elif isinstance(arg, numbers.Number):
                 return str(arg)
             elif isinstance(arg, Variable):
