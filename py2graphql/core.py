@@ -23,7 +23,7 @@ class GraphQLEndpointError(Exception):
 
 
 class Aliased(object):
-    def __init__(self, alias, name):
+    def __init__(self, name, alias):
         self.alias = alias
         self.name = name
 
