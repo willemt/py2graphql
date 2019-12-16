@@ -22,7 +22,7 @@ class GraphQLEndpointError(Exception):
         super().__init__(response)
 
 
-class Alias(object):
+class Aliased(object):
     def __init__(self, alias, name):
         self.alias = alias
         self.name = name
@@ -127,7 +127,7 @@ class Query(object):
         def serialize_node(node):
             if isinstance(node, str):
                 return node
-            elif isinstance(node, Alias):
+            elif isinstance(node, Aliased):
                 return "{}: {}".format(node.alias, node.name)
             else:
                 raise Exception()

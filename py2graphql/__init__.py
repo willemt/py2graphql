@@ -1,5 +1,5 @@
 from .core import (
-    Alias,
+    Aliased,
     Client,
     GraphQLError,
     GraphQLEndpointError,
