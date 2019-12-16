@@ -22,6 +22,12 @@ class GraphQLEndpointError(Exception):
         super().__init__(response)
 
 
+class Alias(object):
+    def __init__(self, alias, name):
+        self.alias = alias
+        self.name = name
+
+
 class Variable(object):
     def __init__(self, name):
         self.name = name
@@ -118,11 +124,20 @@ class Query(object):
             ]
         )
 
-        if nodes:
-            if indentation:
-                nodes_str = ("\n" + " " * tab).join([v for v in nodes])
+        def serialize_node(node):
+            if isinstance(node, str):
+                return node
+            elif isinstance(node, Alias):
+                return "{}: {}".format(node.alias, node.name)
             else:
-                nodes_str = " ".join([v for v in nodes])
+                raise Exception()
+
+        if nodes:
+            nodes = map(serialize_node, nodes)
+            if indentation:
+                nodes_str = ("\n" + " " * tab).join(nodes)
+            else:
+                nodes_str = " ".join(nodes)
 
             # Determine the operation
             if self._operation_name:
@@ -144,12 +159,7 @@ class Query(object):
                 nl=nl,
             )
         else:
-            return "{name} {{{nl}}}".format(
-                name=name,
-                opening_tab=" " * tab,
-                closing_tab=" " * (tab - indentation),
-                nl=nl,
-            )
+            return "{name} {{{nl}}}".format(name=name, nl=nl)
 
     def _get_root(self):
         if self._parent:

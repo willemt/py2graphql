@@ -1,4 +1,5 @@
 from .core import (
+    Alias,
     Client,
     GraphQLError,
     GraphQLEndpointError,

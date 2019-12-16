@@ -3,7 +3,7 @@ import unittest
 
 import mock
 
-from py2graphql import Client, GraphQLEndpointError, GraphQLError, Literal, Query
+from py2graphql import Alias, Client, GraphQLEndpointError, GraphQLError, Literal, Query
 
 
 class Py2GraphqlTests(unittest.TestCase):
@@ -95,6 +95,15 @@ class Py2GraphqlTests(unittest.TestCase):
             .values("title", "url")
             .to_graphql(indentation=0),
             'mutation {repository(owner: "juliuscaeser", isAdmin: true) {title url}}',
+        )
+
+    def test_alias(self):
+        self.assertEqual(
+            Query()
+            .repository(owner="juliuscaeser", test=True)
+            .values(Alias("xxx", "title"), "url")
+            .to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", test: true) {xxx: title url}}',
         )
 
     def test_subscripting_query_fetches(self):
