@@ -182,34 +182,30 @@ class Query(object):
         client = root._client
         graphql = root.to_graphql()
 
-        body = {"query": graphql}
-
-        if variables:
-            body["variables"] = variables
-
-        r = requests.post(client.url, json.dumps(body), headers=client.headers)
-
-        if r.status_code != 200:
-            try:
-                raise GraphQLError(json.loads(r.content))
-            except json.JSONDecodeError:
-                raise GraphQLEndpointError(r.content)
-
-        response_content = json.loads(r.content)
+        response_content = client.fetch(graphql, variables)
 
         errors = response_content.get("errors")
         if errors is not None:
-            raise GraphQLError(json.loads(r.content))
+            raise GraphQLError(response_content)
 
         data = response_content.get("data", {})
         result_dict = addict.Dict(data)
+
+        return client.pre_response(result_dict, root_node=root)
+
         return result_dict
 
     def __str__(self):
         return self.to_graphql()
 
     def __iter__(self):
-        return self.fetch().items()
+        item = self.fetch()
+        if isinstance(item, dict):
+            return item.items()
+        elif isinstance(item, list):
+            return item
+        else:
+            raise Exception
 
 
 class Mutation(Query):
@@ -227,3 +223,27 @@ class Client(object):
 
     def mutation(self, **kwargs):
         return Mutation(client=self, **kwargs)
+
+    def pre_response(self, result_dict, root_node):
+        return result_dict
+
+    def fetch(self, graphql, variables={}):
+        body = {"query": graphql}
+
+        if variables:
+            body["variables"] = variables
+
+        r = requests.post(self.url, json.dumps(body), headers=self.headers)
+
+        if r.status_code != 200:
+            try:
+                raise GraphQLError(json.loads(r.content))
+            except json.JSONDecodeError:
+                raise GraphQLEndpointError(r.content)
+
+        return json.loads(r.content)
+
+
+class AutoSubscriptingClient(Client):
+    def pre_response(self, result_dict, root_node):
+        return result_dict[root_node._nodes[0]._operation_type]

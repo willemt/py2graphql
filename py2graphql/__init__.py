@@ -1,5 +1,6 @@
 from .core import (
     Aliased,
+    AutoSubscriptingClient,
     Client,
     GraphQLError,
     GraphQLEndpointError,

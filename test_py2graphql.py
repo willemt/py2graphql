@@ -3,7 +3,15 @@ import unittest
 
 import mock
 
-from py2graphql import Aliased, Client, GraphQLEndpointError, GraphQLError, Literal, Query
+from py2graphql import (
+    Aliased,
+    AutoSubscriptingClient,
+    Client,
+    GraphQLEndpointError,
+    GraphQLError,
+    Literal,
+    Query,
+)
 
 
 class Py2GraphqlTests(unittest.TestCase):
@@ -124,6 +132,27 @@ class Py2GraphqlTests(unittest.TestCase):
                 Query(client=Client("http://example.com", {}))
                 .repository(owner="juliuscaeser", test=10)
                 .values("title", "url")["repository"],
+                {"title": "xxx", "url": "example.com"},
+            )
+
+    def test_auto_subscript(self):
+        class FakeResponse:
+            pass
+
+        def fake_request(url, body, headers):
+            r = FakeResponse()
+            r.status_code = 200
+            r.content = json.dumps(
+                {"data": {"repository": {"title": "xxx", "url": "example.com"}}}
+            )
+            return r
+
+        http_mock = mock.Mock(side_effect=fake_request)
+        with mock.patch("requests.post", http_mock):
+            self.assertEqual(
+                Query(client=AutoSubscriptingClient("http://example.com", {}))
+                .repository(owner="juliuscaeser", test=10)
+                .values("title", "url").fetch(),
                 {"title": "xxx", "url": "example.com"},
             )
 
