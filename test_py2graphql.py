@@ -127,6 +127,46 @@ class Py2GraphqlTests(unittest.TestCase):
                 {"title": "xxx", "url": "example.com"},
             )
 
+    def test_syntax_error_response(self):
+        class FakeResponse:
+            pass
+
+        def fake_request(url, body, headers):
+            r = FakeResponse()
+            r.status_code = 200
+            r.content = json.dumps(
+                {
+                    "errors": [
+                        {
+                            "message": 'Syntax Error GraphQL (2:18) Unexpected Name "null"\n',
+                            "locations": [{"line": 2, "column": 18}],
+                        }
+                    ]
+                }
+            )
+            return r
+
+        http_mock = mock.Mock(side_effect=fake_request)
+        with mock.patch("requests.post", http_mock):
+            try:
+                Query(client=Client("http://example.com", {})).repository(
+                    owner=None, test=10
+                ).values("title", "url").fetch()
+            except GraphQLError as e:
+                self.assertEqual(
+                    e.response,
+                    {
+                        "errors": [
+                            {
+                                "locations": [{"column": 18, "line": 2}],
+                                "message": 'Syntax Error GraphQL (2:18) Unexpected Name "null"\n',
+                            }
+                        ]
+                    },
+                )
+            else:
+                assert False
+
     def test_raise_exceptions(self):
         class FakeResponse:
             pass
