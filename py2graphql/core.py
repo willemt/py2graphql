@@ -196,14 +196,13 @@ class Query(object):
                 raise GraphQLEndpointError(r.content)
 
         response_content = json.loads(r.content)
-        data = response_content["data"]
+
         errors = response_content.get("errors")
-
-        result_dict = addict.Dict(data)
-
         if errors is not None:
             raise GraphQLError(json.loads(r.content))
 
+        data = response_content.get("data", {})
+        result_dict = addict.Dict(data)
         return result_dict
 
     def __str__(self):
