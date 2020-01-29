@@ -4,6 +4,7 @@ from .core import (
     Client,
     GraphQLError,
     GraphQLEndpointError,
+    InfinityNotSupportedError,
     Literal,
     Mutation,
     Query,

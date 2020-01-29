@@ -1,5 +1,10 @@
 import json
 import unittest
+from string import printable
+
+from graphql import parse
+
+from hypothesis import given, strategies as st
 
 import mock
 
@@ -9,6 +14,7 @@ from py2graphql import (
     Client,
     GraphQLEndpointError,
     GraphQLError,
+    InfinityNotSupportedError,
     Literal,
     Query,
 )
@@ -237,6 +243,29 @@ class Py2GraphqlTests(unittest.TestCase):
                 self.assertEqual(e.response, "blahblah")
             else:
                 assert False
+
+    @given(st.fixed_dictionaries({"xxx": st.text(printable)}))
+    def test_fuzz(self, data):
+        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        parse(str(query))
+
+    @given(st.fixed_dictionaries({"xxx": st.floats(allow_infinity=True)}))
+    def test_fuzz_floats(self, data):
+        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        try:
+            parse(str(query))
+        except InfinityNotSupportedError:
+            pass
+
+    @given(st.fixed_dictionaries({"xxx": st.integers()}))
+    def test_fuzz_integers(self, data):
+        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        parse(str(query))
+
+    @given(st.fixed_dictionaries({"xxx": st.lists(st.text(printable))}))
+    def test_fuzz_lists(self, data):
+        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        parse(str(query))
 
 
 if __name__ == "__main__":

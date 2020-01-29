@@ -1,9 +1,14 @@
 import json
+import math
 import numbers
 
 import addict
 
 import requests
+
+
+class InfinityNotSupportedError(Exception):
+    pass
 
 
 class GraphQLError(Exception):
@@ -96,6 +101,10 @@ class Query(object):
             if isinstance(arg, type(None)):
                 return "null"
             elif isinstance(arg, numbers.Number):
+                if math.isinf(arg):
+                    raise InfinityNotSupportedError(
+                        "Graphql doesn't support infinite floats"
+                    )
                 return str(arg)
             elif isinstance(arg, Literal):
                 return arg.name
@@ -109,8 +118,18 @@ class Query(object):
                         ["{}: {}".format(k, serialize_arg(v)) for k, v in arg.items()]
                     )
                 )
-            else:
+            elif isinstance(arg, str):
+                arg = (
+                    arg.replace("\\", "\\\\")
+                    .replace("\f", "\\f")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\v", "")
+                    .replace('"', '\\"')
+                )
                 return f'"{arg}"'
+            else:
+                raise Exception(arg)
 
         if self._call_args:
             args = ", ".join(
