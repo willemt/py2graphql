@@ -192,7 +192,7 @@ class Query(object):
             return self
 
     def __getitem__(self, x):
-        return getattr(self.fetch(), x)
+        return self.fetch()[x]
 
     def fetch(self, variables={}):
         root = self._get_root()

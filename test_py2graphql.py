@@ -198,6 +198,29 @@ class Py2GraphqlTests(unittest.TestCase):
             ):
                 self.assertEqual(x["title"], "xxx")
 
+    def test_iteration(self):
+        class FakeResponse:
+            pass
+
+        def fake_request(url, body, headers):
+            r = FakeResponse()
+            r.status_code = 200
+            r.content = json.dumps(
+                {"data": {"repos": [{"title": "xxx", "url": "example.com"}]}}
+            )
+            return r
+
+        client = Client("http://example.com", {})
+
+        http_mock = mock.Mock(side_effect=fake_request)
+        with mock.patch("requests.post", http_mock):
+            for x in (
+                Query(client=client)
+                .repos(owner="juliuscaeser", test=10)
+                .values("title", "url")["repos"]
+            ):
+                self.assertEqual(x["title"], "xxx")
+
     def test_syntax_error_response(self):
         class FakeResponse:
             pass
