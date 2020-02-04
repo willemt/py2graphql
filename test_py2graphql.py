@@ -10,7 +10,6 @@ import mock
 
 from py2graphql import (
     Aliased,
-    AutoSubscriptingClient,
     Client,
     GraphQLEndpointError,
     GraphQLError,
@@ -18,6 +17,7 @@ from py2graphql import (
     Literal,
     Query,
 )
+from py2graphql.middleware import AddictMiddleware, AutoSubscriptingMiddleware
 
 
 class Py2GraphqlTests(unittest.TestCase):
@@ -135,7 +135,11 @@ class Py2GraphqlTests(unittest.TestCase):
         http_mock = mock.Mock(side_effect=fake_request)
         with mock.patch("requests.post", http_mock):
             self.assertEqual(
-                Query(client=Client("http://example.com", {}))
+                Query(
+                    client=Client(
+                        "http://example.com", {}, middleware=[AddictMiddleware]
+                    )
+                )
                 .repository(owner="juliuscaeser", test=10)
                 .values("title", "url")["repository"],
                 {"title": "xxx", "url": "example.com"},
@@ -156,9 +160,16 @@ class Py2GraphqlTests(unittest.TestCase):
         http_mock = mock.Mock(side_effect=fake_request)
         with mock.patch("requests.post", http_mock):
             self.assertEqual(
-                Query(client=AutoSubscriptingClient("http://example.com", {}))
+                Query(
+                    client=Client(
+                        "http://example.com",
+                        {},
+                        middleware=[AutoSubscriptingMiddleware],
+                    )
+                )
                 .repository(owner="juliuscaeser", test=10)
-                .values("title", "url").fetch(),
+                .values("title", "url")
+                .fetch(),
                 {"title": "xxx", "url": "example.com"},
             )
 
@@ -218,8 +229,8 @@ class Py2GraphqlTests(unittest.TestCase):
                 Query(client=Client("http://example.com", {})).repository(
                     owner="juliuscaeser", test=10
                 ).values("title", "url")["repository"]
-            except GraphQLError as e:
-                self.assertEqual(e.response, {"errors": {"repository": "xxx"}})
+            except GraphQLEndpointError as e:
+                self.assertEqual(e.response, '{"errors": {"repository": "xxx"}}')
             else:
                 assert False
 
@@ -246,12 +257,20 @@ class Py2GraphqlTests(unittest.TestCase):
 
     @given(st.fixed_dictionaries({"xxx": st.text(printable)}))
     def test_fuzz(self, data):
-        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        query = (
+            Query(client=Client("http://example.com", {}))
+            .repository(**data)
+            .values("id")
+        )
         parse(str(query))
 
     @given(st.fixed_dictionaries({"xxx": st.floats(allow_infinity=True)}))
     def test_fuzz_floats(self, data):
-        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        query = (
+            Query(client=Client("http://example.com", {}))
+            .repository(**data)
+            .values("id")
+        )
         try:
             parse(str(query))
         except InfinityNotSupportedError:
@@ -259,12 +278,20 @@ class Py2GraphqlTests(unittest.TestCase):
 
     @given(st.fixed_dictionaries({"xxx": st.integers()}))
     def test_fuzz_integers(self, data):
-        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        query = (
+            Query(client=Client("http://example.com", {}))
+            .repository(**data)
+            .values("id")
+        )
         parse(str(query))
 
     @given(st.fixed_dictionaries({"xxx": st.lists(st.text(printable))}))
     def test_fuzz_lists(self, data):
-        query = Query(client=Client("http://example.com", {})).repository(**data).values("id")
+        query = (
+            Query(client=Client("http://example.com", {}))
+            .repository(**data)
+            .values("id")
+        )
         parse(str(query))
 
 

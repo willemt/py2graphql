@@ -2,8 +2,6 @@ import json
 import math
 import numbers
 
-import addict
-
 import requests
 
 
@@ -22,7 +20,7 @@ class GraphQLError(Exception):
 class GraphQLEndpointError(Exception):
     """GraphQL endpoint didn't respond with a JSON object"""
 
-    def __init__(self, response):
+    def __init__(self, response, status_code):
         self.response = response
         super().__init__(response)
 
@@ -208,11 +206,8 @@ class Query(object):
             raise GraphQLError(response_content)
 
         data = response_content.get("data", {})
-        result_dict = addict.Dict(data)
 
-        return client.pre_response(result_dict, root_node=root)
-
-        return result_dict
+        return client.pre_response(data, root_node=root)
 
     def __str__(self):
         return self.to_graphql()
@@ -233,9 +228,10 @@ class Mutation(Query):
 
 
 class Client(object):
-    def __init__(self, url, headers):
+    def __init__(self, url, headers, middleware=[]):
         self.url = url
         self.headers = headers
+        self.middleware = [mw() for mw in middleware]
 
     def query(self, **kwargs):
         return Query(client=self, **kwargs)
@@ -244,6 +240,8 @@ class Client(object):
         return Mutation(client=self, **kwargs)
 
     def pre_response(self, result_dict, root_node):
+        for mw in self.middleware:
+            result_dict = mw.pre_response(result_dict, root_node)
         return result_dict
 
     def fetch(self, graphql, variables={}):
@@ -255,14 +253,6 @@ class Client(object):
         r = requests.post(self.url, json.dumps(body), headers=self.headers)
 
         if r.status_code != 200:
-            try:
-                raise GraphQLError(json.loads(r.content))
-            except json.JSONDecodeError:
-                raise GraphQLEndpointError(r.content)
+            raise GraphQLEndpointError(r.content, status_code=r.status_code)
 
         return json.loads(r.content)
-
-
-class AutoSubscriptingClient(Client):
-    def pre_response(self, result_dict, root_node):
-        return result_dict[root_node._nodes[0]._operation_type]
