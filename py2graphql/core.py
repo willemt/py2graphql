@@ -217,7 +217,7 @@ class Query(object):
         if isinstance(item, dict):
             return item.items()
         elif isinstance(item, list):
-            return item
+            return iter(item)
         else:
             raise Exception
 

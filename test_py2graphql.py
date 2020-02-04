@@ -173,6 +173,31 @@ class Py2GraphqlTests(unittest.TestCase):
                 {"title": "xxx", "url": "example.com"},
             )
 
+    def test_auto_subscript_iteration(self):
+        class FakeResponse:
+            pass
+
+        def fake_request(url, body, headers):
+            r = FakeResponse()
+            r.status_code = 200
+            r.content = json.dumps(
+                {"data": {"repos": [{"title": "xxx", "url": "example.com"}]}}
+            )
+            return r
+
+        client = Client(
+            "http://example.com", {}, middleware=[AutoSubscriptingMiddleware]
+        )
+
+        http_mock = mock.Mock(side_effect=fake_request)
+        with mock.patch("requests.post", http_mock):
+            for x in (
+                Query(client=client)
+                .repos(owner="juliuscaeser", test=10)
+                .values("title", "url")
+            ):
+                self.assertEqual(x["title"], "xxx")
+
     def test_syntax_error_response(self):
         class FakeResponse:
             pass
