@@ -300,6 +300,7 @@ class Py2GraphqlTests(unittest.TestCase):
                 ).values("title", "url")["repository"]
             except GraphQLEndpointError as e:
                 self.assertEqual(e.response, "blahblah")
+                self.assertEqual(e.status_code, 400)
             else:
                 assert False
 

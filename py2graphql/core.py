@@ -20,8 +20,10 @@ class GraphQLError(Exception):
 class GraphQLEndpointError(Exception):
     """GraphQL endpoint didn't respond with a JSON object"""
 
-    def __init__(self, response, status_code):
+    def __init__(self, response, status_code, response_object):
         self.response = response
+        self.status_code = status_code
+        self.response_object = response_object
         super().__init__(response)
 
 
@@ -253,6 +255,8 @@ class Client(object):
         r = requests.post(self.url, json.dumps(body), headers=self.headers)
 
         if r.status_code != 200:
-            raise GraphQLEndpointError(r.content, status_code=r.status_code)
+            raise GraphQLEndpointError(
+                r.content, status_code=r.status_code, response_object=r
+            )
 
         return json.loads(r.content)
