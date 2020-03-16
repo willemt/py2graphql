@@ -246,13 +246,16 @@ class Client(object):
             result_dict = mw.pre_response(result_dict, root_node)
         return result_dict
 
+    def do_request(self, body):
+        return requests.post(self.url, body, headers=self.headers)
+
     def fetch(self, graphql, variables={}):
         body = {"query": graphql}
 
         if variables:
             body["variables"] = variables
 
-        r = requests.post(self.url, json.dumps(body), headers=self.headers)
+        r = self.do_request(json.dumps(body))
 
         if r.status_code != 200:
             raise GraphQLEndpointError(
