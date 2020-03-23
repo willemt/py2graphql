@@ -1,6 +1,9 @@
+import asyncio
 import json
 import unittest
 from string import printable
+
+from asynctest import CoroutineMock, patch
 
 from graphql import parse
 
@@ -144,6 +147,29 @@ class Py2GraphqlTests(unittest.TestCase):
                 .values("title", "url")["repository"],
                 {"title": "xxx", "url": "example.com"},
             )
+
+    def test_fetch_async(self):
+        async def task():
+            with patch("aiohttp.ClientSession.post") as mocked:
+                mocked.return_value.__aenter__.return_value.status = 200
+                mocked.return_value.__aenter__.return_value.text = CoroutineMock(
+                    return_value=json.dumps(
+                        {"data": {"repository": {"title": "xxx", "url": "example.com"}}}
+                    )
+                )
+                result = (
+                    await Query(client=Client("http://example.com", {}))
+                    .repository(owner="juliuscaeser", test=10)
+                    .values("title", "url")
+                    .fetch_async()
+                )
+                self.assertEqual(
+                    result, {"repository": {"title": "xxx", "url": "example.com"}}
+                )
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(task())
+        loop.close()
 
     def test_auto_subscript(self):
         class FakeResponse:
