@@ -2,7 +2,11 @@ import json
 import math
 import numbers
 
+import aiohttp
+
 import requests
+
+from tenacity import retry, wait_fixed
 
 
 class InfinityNotSupportedError(Exception):
@@ -244,6 +248,16 @@ class Mutation(Query):
         super(Mutation, self).__init__(operation_type=operation_type, **kwargs)
 
 
+@retry(wait=wait_fixed(2))
+async def do_request_async(url, body, headers):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            url, data=body, headers=headers
+        ) as response:
+            await response.text()
+            return response
+
+
 class Client(object):
     def __init__(self, url, headers, middleware=[]):
         self.url = url
@@ -265,14 +279,7 @@ class Client(object):
         return requests.post(self.url, body, headers=self.headers)
 
     async def do_request_async(self, body):
-        import aiohttp
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                self.url, data=body, headers=self.headers
-            ) as response:
-                await response.text()
-                return response
+        return await do_request_async(self.url, body, self.headers)
 
     def fetch(self, graphql, variables={}):
         body = {"query": graphql}
