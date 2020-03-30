@@ -7,5 +7,6 @@ from .core import (
     Literal,
     Mutation,
     Query,
+    UnserializableTypeError,
     Variable,
 )

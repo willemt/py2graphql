@@ -19,12 +19,13 @@ from py2graphql import (
     InfinityNotSupportedError,
     Literal,
     Query,
+    UnserializableTypeError,
 )
 from py2graphql.middleware import AddictMiddleware, AutoSubscriptingMiddleware
 
 
 class Py2GraphqlTests(unittest.TestCase):
-    def test_function(self):
+    def test_simple(self):
         self.assertEqual(
             Query()
             .repository(owner="juliuscaeser", name="rome")
@@ -95,6 +96,16 @@ class Py2GraphqlTests(unittest.TestCase):
             .to_graphql(indentation=0),
             'query {repository(owner: "juliuscaeser", test: {a: 1}) {title url}}',
         )
+
+    def test_function(self):
+        try:
+            Query().repository(owner="juliuscaeser", test=lambda: "").values(
+                "title", "url"
+            ).to_graphql(indentation=0)
+        except UnserializableTypeError:
+            pass
+        else:
+            raise Exception
 
     def test_list_with_contents(self):
         self.assertEqual(
