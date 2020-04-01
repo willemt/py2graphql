@@ -1,6 +1,4 @@
 import json
-import math
-import numbers
 
 import aiohttp
 
@@ -8,90 +6,9 @@ import requests
 
 from tenacity import retry, wait_fixed
 
-
-class InfinityNotSupportedError(Exception):
-    pass
-
-
-class GraphQLError(Exception):
-    """GraphQL endpoint responded with a GraphQL error"""
-
-    def __init__(self, response):
-        self.response = response
-        super().__init__(response)
-
-
-class GraphQLEndpointError(Exception):
-    """GraphQL endpoint didn't respond with a JSON object"""
-
-    def __init__(self, response, status_code, response_object):
-        self.response = response
-        self.status_code = status_code
-        self.response_object = response_object
-        super().__init__(response)
-
-
-class UnserializableTypeError(Exception):
-    pass
-
-
-class Aliased(object):
-    def __init__(self, name, alias):
-        self.alias = alias
-        self.name = name
-
-
-class Variable(object):
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return self.name
-
-
-class Literal(object):
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return self.name
-
-
-def serialize_arg(arg):
-    if isinstance(arg, bool):
-        return "true" if arg else "false"
-    if isinstance(arg, type(None)):
-        return "null"
-    elif isinstance(arg, numbers.Number):
-        if math.isinf(arg):
-            raise InfinityNotSupportedError(
-                "Graphql doesn't support infinite floats"
-            )
-        return str(arg)
-    elif isinstance(arg, Literal):
-        return arg.name
-    elif isinstance(arg, Variable):
-        return "${}".format(arg.name)
-    elif isinstance(arg, list):
-        return "[{}]".format(", ".join(map(serialize_arg, arg)))
-    elif isinstance(arg, dict):
-        return "{{{}}}".format(
-            ", ".join(
-                ["{}: {}".format(k, serialize_arg(v)) for k, v in arg.items()]
-            )
-        )
-    elif isinstance(arg, str):
-        arg = (
-            arg.replace("\\", "\\\\")
-            .replace("\f", "\\f")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\v", "")
-            .replace('"', '\\"')
-        )
-        return f'"{arg}"'
-    else:
-        raise UnserializableTypeError(arg)
+from .exception import GraphQLEndpointError, GraphQLError
+from .serialization import serialize_arg
+from .types import Aliased
 
 
 class Query(object):
