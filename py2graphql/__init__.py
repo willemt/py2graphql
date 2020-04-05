@@ -1,12 +1,16 @@
 from .core import (
-    Aliased,
     Client,
+    Mutation,
+    Query,
+)
+from .exception import (
     GraphQLError,
     GraphQLEndpointError,
     InfinityNotSupportedError,
-    Literal,
-    Mutation,
-    Query,
     UnserializableTypeError,
+)
+from .types import (
+    Aliased,
+    Literal,
     Variable,
 )

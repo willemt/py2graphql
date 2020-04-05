@@ -1,10 +1,12 @@
 import json
+from typing import List
 
 import aiohttp
 
 import requests
 
-from tenacity import retry, wait_fixed
+from tenacity import retry, stop_after_attempt
+from tenacity.wait import wait_fixed
 
 from .exception import GraphQLEndpointError, GraphQLError
 from .serialization import serialize_arg
@@ -18,10 +20,10 @@ class Query(object):
 
     def __init__(
         self,
-        operation_type="query",
+        operation_type: str = "query",
         client=None,
         parent=None,
-        operation_name=None,
+        operation_name: str = None,
         operation_variables=[],
     ):
         """
@@ -32,15 +34,15 @@ class Query(object):
        """
 
         self._operation_type = operation_type
-        self._nodes = []
+        self._nodes: List[Query] = []
         self._call_args = None
-        self._values_to_show = []
+        self._values_to_show: List[str] = []
         self._client = client
         self._parent = parent
         self._operation_name = operation_name
         self._operation_variables = operation_variables
 
-    def __getattr__(self, key):
+    def __getattr__(self, key: str):
         q = Query(operation_type=key, parent=self)
         self._nodes.append(q)
         return q
@@ -53,10 +55,10 @@ class Query(object):
         self._values_to_show.extend(args)
         return self
 
-    def to_graphql(self, indentation=2):
+    def to_graphql(self, indentation: int = 2):
         return self._get_root()._to_graphql(indentation=indentation)
 
-    def _to_graphql(self, tab=2, indentation=2):
+    def _to_graphql(self, tab: int = 2, indentation: int = 2):
         if not indentation:
             tab = 0
             nl = ""
@@ -91,7 +93,7 @@ class Query(object):
                 raise Exception()
 
         if nodes:
-            nodes = map(serialize_node, nodes)
+            nodes = list(map(serialize_node, nodes))
             if indentation:
                 nodes_str = ("\n" + " " * tab).join(nodes)
             else:
@@ -125,7 +127,7 @@ class Query(object):
         else:
             return self
 
-    def __getitem__(self, x):
+    def __getitem__(self, x: str):
         return self.fetch()[x]
 
     def fetch(self, variables={}):
@@ -176,8 +178,8 @@ class Mutation(Query):
         super(Mutation, self).__init__(operation_type=operation_type, **kwargs)
 
 
-@retry(wait=wait_fixed(2))
-async def do_request_async(url, body, headers):
+@retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+async def do_request_async(url: str, body, headers: dict):
     async with aiohttp.ClientSession() as session:
         async with session.post(
             url, data=body, headers=headers
@@ -187,7 +189,7 @@ async def do_request_async(url, body, headers):
 
 
 class Client(object):
-    def __init__(self, url, headers, middleware=[]):
+    def __init__(self, url: str, headers, middleware=[]):
         self.url = url
         self.headers = headers
         self.middleware = [mw() for mw in middleware]
@@ -209,7 +211,7 @@ class Client(object):
     async def do_request_async(self, body):
         return await do_request_async(self.url, body, self.headers)
 
-    def fetch(self, graphql, variables={}):
+    def fetch(self, graphql: str, variables={}):
         body = {"query": graphql}
 
         if variables:
@@ -224,7 +226,7 @@ class Client(object):
 
         return json.loads(r.content)
 
-    async def fetch_async(self, graphql, variables={}):
+    async def fetch_async(self, graphql: str, variables={}):
         body = {"query": graphql}
 
         if variables:

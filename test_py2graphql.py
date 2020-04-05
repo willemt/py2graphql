@@ -178,7 +178,36 @@ class Py2GraphqlTests(unittest.TestCase):
                     result, {"repository": {"title": "xxx", "url": "example.com"}}
                 )
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(task())
+        loop.close()
+
+    def test_fetch_async_retry(self):
+        async def task():
+            class ReturnValue:
+                pass
+
+            with patch("aiohttp.ClientSession.post") as mocked:
+                ret = ReturnValue
+                ret.status = 200
+                ret.text = CoroutineMock(
+                    return_value=json.dumps(
+                        {"data": {"repository": {"title": "xxx", "url": "example.com"}}}
+                    )
+                )
+                mocked.return_value.__aenter__.side_effect = [Exception(), ret]
+
+                result = (
+                    await Query(client=Client("http://example.com", {}))
+                    .repository(owner="juliuscaeser", test=10)
+                    .values("title", "url")
+                    .fetch_async()
+                )
+                self.assertEqual(
+                    result, {"repository": {"title": "xxx", "url": "example.com"}}
+                )
+
+        loop = asyncio.new_event_loop()
         loop.run_until_complete(task())
         loop.close()
 
