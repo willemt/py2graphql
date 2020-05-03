@@ -180,9 +180,10 @@ class Mutation(Query):
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
 async def do_request_async(url: str, body, headers: dict):
+    timeout = aiohttp.ClientTimeout(total=25)
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            url, data=body, headers=headers
+            url, data=body, headers=headers, timeout=timeout
         ) as response:
             await response.text()
             return response
@@ -206,7 +207,7 @@ class Client(object):
         return result_dict
 
     def do_request(self, body):
-        return requests.post(self.url, body, headers=self.headers)
+        return requests.post(self.url, body, headers=self.headers, timeout=25)
 
     async def do_request_async(self, body):
         return await do_request_async(self.url, body, self.headers)

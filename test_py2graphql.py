@@ -138,7 +138,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 200
             r.content = json.dumps(
@@ -215,7 +215,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 200
             r.content = json.dumps(
@@ -243,7 +243,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 200
             r.content = json.dumps(
@@ -268,7 +268,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 200
             r.content = json.dumps(
@@ -291,7 +291,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 200
             r.content = json.dumps(
@@ -331,7 +331,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 400
             r.content = json.dumps({"errors": {"repository": "xxx"}})
@@ -352,7 +352,7 @@ class Py2GraphqlTests(unittest.TestCase):
         class FakeResponse:
             pass
 
-        def fake_request(url, body, headers):
+        def fake_request(url, body, headers, **kwargs):
             r = FakeResponse()
             r.status_code = 400
             r.content = "blahblah"
