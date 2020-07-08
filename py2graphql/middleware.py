@@ -11,7 +11,7 @@ class AutoSubscriptingMiddleware:
 class AddictMiddleware:
     def pre_response(self, result_dict, root_node):
         try:
-            import addict
+            import addict  # type: ignore
             return addict.Dict(result_dict)
         except ImportError:
             raise Exception("addict not available")

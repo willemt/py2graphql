@@ -15,7 +15,7 @@ def long_description():
 
 setup(
     name="py2graphql",
-    version="0.14.0",
+    version="0.14.1",
     description="Pythonic GraphQL client",
     long_description=long_description(),
     url="https://github.com/willemt/py2graphql",

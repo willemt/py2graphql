@@ -5,8 +5,8 @@ import aiohttp
 
 import requests
 
-from tenacity import retry, stop_after_attempt
-from tenacity.wait import wait_fixed
+from tenacity import retry, stop_after_attempt  # type: ignore
+from tenacity.wait import wait_fixed  # type: ignore
 
 from .exception import GraphQLEndpointError, GraphQLError
 from .serialization import serialize_arg
