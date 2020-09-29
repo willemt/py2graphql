@@ -1,5 +1,5 @@
-Py2graphql
-##########
+py2graphql (Python to GraphQL)
+##############################
 
 |pypi|
 
