@@ -2,6 +2,10 @@ class InfinityNotSupportedError(Exception):
     pass
 
 
+class ValuesRequiresArgumentsError(Exception):
+    pass
+
+
 class GraphQLError(Exception):
     """GraphQL endpoint responded with a GraphQL error"""
 

@@ -8,6 +8,7 @@ from .exception import (
     GraphQLEndpointError,
     InfinityNotSupportedError,
     UnserializableTypeError,
+    ValuesRequiresArgumentsError,
 )
 from .types import (
     Aliased,

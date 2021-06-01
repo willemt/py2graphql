@@ -20,6 +20,7 @@ from py2graphql import (
     Literal,
     Query,
     UnserializableTypeError,
+    ValuesRequiresArgumentsError,
 )
 from py2graphql.middleware import AddictMiddleware, AutoSubscriptingMiddleware
 
@@ -133,6 +134,20 @@ class Py2GraphqlTests(unittest.TestCase):
             .to_graphql(indentation=0),
             'query {repository(owner: "juliuscaeser", test: true) {xxx: title url}}',
         )
+
+    def test_empty_values(self):
+        try:
+            self.assertEqual(
+                Query()
+                .repository(owner="juliuscaeser", isAdmin=True)
+                .values()
+                .to_graphql(indentation=0),
+                'query {repository(owner: "juliuscaeser", isAdmin: true) {title url}}',
+            )
+        except ValuesRequiresArgumentsError:
+            pass
+        else:
+            assert False
 
     def test_subscripting_query_fetches(self):
         class FakeResponse:

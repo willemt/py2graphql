@@ -8,7 +8,7 @@ import requests
 from tenacity import retry, stop_after_attempt  # type: ignore
 from tenacity.wait import wait_fixed  # type: ignore
 
-from .exception import GraphQLEndpointError, GraphQLError
+from .exception import GraphQLEndpointError, GraphQLError, ValuesRequiresArgumentsError
 from .serialization import serialize_arg
 from .types import Aliased
 
@@ -52,6 +52,8 @@ class Query(object):
         return self
 
     def values(self, *args):
+        if not args:
+            raise ValuesRequiresArgumentsError
         self._values_to_show.extend(args)
         return self
 
