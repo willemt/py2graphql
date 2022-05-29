@@ -13,6 +13,10 @@ requests = "^2.24.0"
 tenacity = "^6.2.0"
 
 [tool.poetry.dev-dependencies]
+asynctest = "^0.13.0"
+graphql-core = "^3.2.1"
+hypothesis = "^6.46.9"
+mock = "^4.0.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
