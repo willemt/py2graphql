@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py2graphql"
-version = "0.14.5"
+version = "0.15.0"
 description = "Pythonic GraphQL Client"
 authors = ["Willem Thiart <himself@willemthiart.com>"]
 include = ["py2graphql/py.typed"]
