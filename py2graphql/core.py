@@ -91,6 +91,8 @@ class Query(object):
                 return node
             elif isinstance(node, Aliased):
                 return "{}: {}".format(node.alias, node.name)
+            elif isinstance(node, Query):
+                return node._to_graphql()
             else:
                 raise Exception()
 

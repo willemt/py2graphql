@@ -117,6 +117,30 @@ class Py2GraphqlTests(unittest.TestCase):
             'query {repository(owner: "juliuscaeser", test: [1]) {title url}}',
         )
 
+    def test_nested(self):
+        x = Query().repository(owner="juliuscaeser", test=[1]).values("title", "url", Query().commits.values("id")).to_graphql(indentation=0)
+        self.assertEqual(
+            x,
+            'query {repository(owner: "juliuscaeser", test: [1]) {title url commits {\n'
+            '  id\n'
+            '}}}'
+        )
+        parse(x)
+
+    def test_nested_nested(self):
+        x = Query().repository(owner="juliuscaeser", test=[1]).values("title", "url", Query().commits.values("id", Query().authors.values("name", "id"))).to_graphql(indentation=0)
+        self.assertEqual(
+            x,
+            'query {repository(owner: "juliuscaeser", test: [1]) {title url commits {\n'
+            '  id\n'
+            '  authors {\n'
+            '  name\n'
+            '  id\n'
+            '}\n'
+            '}}}'
+        )
+        parse(x)
+
     def test_mutation_boolean(self):
         self.assertEqual(
             Query(operation_type="mutation")
