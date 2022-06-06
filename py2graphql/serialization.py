@@ -1,3 +1,4 @@
+import enum
 import math
 import numbers
 
@@ -17,6 +18,8 @@ def serialize_arg(arg):
             )
         return str(arg)
     elif isinstance(arg, Literal):
+        return arg.name
+    elif isinstance(arg, enum.Enum):
         return arg.name
     elif isinstance(arg, Variable):
         return "${}".format(arg.name)

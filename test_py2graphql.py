@@ -1,4 +1,5 @@
 import asyncio
+import enum
 import json
 import unittest
 from string import printable
@@ -23,6 +24,11 @@ from py2graphql import (
     ValuesRequiresArgumentsError,
 )
 from py2graphql.middleware import AddictMiddleware, AutoSubscriptingMiddleware
+
+
+class MyEnum(enum.Enum):
+    ABC = "abc"
+    DEF = "def"
 
 
 class Py2GraphqlTests(unittest.TestCase):
@@ -96,6 +102,15 @@ class Py2GraphqlTests(unittest.TestCase):
             .values("title", "url")
             .to_graphql(indentation=0),
             'query {repository(owner: "juliuscaeser", test: {a: 1}) {title url}}',
+        )
+
+    def test_enum(self):
+        self.assertEqual(
+            Query()
+            .repository(owner="juliuscaeser", test=MyEnum.ABC)
+            .values("title", "url")
+            .to_graphql(indentation=0),
+            'query {repository(owner: "juliuscaeser", test: ABC) {title url}}',
         )
 
     def test_function(self):
