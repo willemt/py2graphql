@@ -1,9 +1,17 @@
 [tool.poetry]
 name = "py2graphql"
-version = "0.16.0"
+version = "0.17.0"
 description = "Pythonic GraphQL Client"
+readme = "README.rst"
 authors = ["Willem Thiart <himself@willemthiart.com>"]
+keywords = ["graphql"]
+license = "MIT"
 include = ["py2graphql/py.typed"]
+homepage = "https://github.com/willemt/py2graphql"
+repository = "https://github.com/willemt/py2graphql"
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
