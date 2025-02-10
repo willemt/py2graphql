@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py2graphql"
-version = "0.18.0"
+version = "0.19.0"
 description = "Pythonic GraphQL Client"
 readme = "README.rst"
 authors = ["Willem Thiart <himself@willemthiart.com>"]
@@ -18,7 +18,7 @@ python = "^3.7"
 addict = "^2.2.1"
 aiohttp = "^3.6.2"
 requests = "^2.24.0"
-tenacity = "^6.2.0"
+tenacity = ">=6.2.0,<10.0.0"
 
 [tool.poetry.dev-dependencies]
 asynctest = "^0.13.0"
