@@ -3,27 +3,32 @@ import enum
 import json
 import unittest
 from string import printable
-
-from asynctest import CoroutineMock, patch
+from unittest import mock
+from unittest.mock import patch
 
 from graphql import parse
+from hypothesis import given
+from hypothesis import strategies as st
 
-from hypothesis import given, strategies as st
+from py2graphql import Aliased
+from py2graphql import Client
+from py2graphql import GraphQLEndpointError
+from py2graphql import GraphQLError
+from py2graphql import InfinityNotSupportedError
+from py2graphql import Literal
+from py2graphql import Query
+from py2graphql import UnserializableTypeError
+from py2graphql import ValuesRequiresArgumentsError
+from py2graphql.middleware import AddictMiddleware
+from py2graphql.middleware import AutoSubscriptingMiddleware
 
-import mock
 
-from py2graphql import (
-    Aliased,
-    Client,
-    GraphQLEndpointError,
-    GraphQLError,
-    InfinityNotSupportedError,
-    Literal,
-    Query,
-    UnserializableTypeError,
-    ValuesRequiresArgumentsError,
-)
-from py2graphql.middleware import AddictMiddleware, AutoSubscriptingMiddleware
+# Helper function to create a coroutine mock
+def create_async_mock(return_value=None):
+    """Create a mock that returns a coroutine function which returns the given value."""
+    async def mock_coroutine(*args, **kwargs):
+        return return_value
+    return mock.Mock(side_effect=mock_coroutine)
 
 
 class MyEnum(enum.Enum):
@@ -133,26 +138,40 @@ class Py2GraphqlTests(unittest.TestCase):
         )
 
     def test_nested(self):
-        x = Query().repository(owner="juliuscaeser", test=[1]).values("title", "url", Query().commits.values("id")).to_graphql(indentation=0)
+        x = (
+            Query()
+            .repository(owner="juliuscaeser", test=[1])
+            .values("title", "url", Query().commits.values("id"))
+            .to_graphql(indentation=0)
+        )
         self.assertEqual(
             x,
             'query {repository(owner: "juliuscaeser", test: [1]) {title url commits {\n'
-            '  id\n'
-            '}}}'
+            "  id\n"
+            "}}}",
         )
         parse(x)
 
     def test_nested_nested(self):
-        x = Query().repository(owner="juliuscaeser", test=[1]).values("title", "url", Query().commits.values("id", Query().authors.values("name", "id"))).to_graphql(indentation=0)
+        x = (
+            Query()
+            .repository(owner="juliuscaeser", test=[1])
+            .values(
+                "title",
+                "url",
+                Query().commits.values("id", Query().authors.values("name", "id")),
+            )
+            .to_graphql(indentation=0)
+        )
         self.assertEqual(
             x,
             'query {repository(owner: "juliuscaeser", test: [1]) {title url commits {\n'
-            '  id\n'
-            '  authors {\n'
-            '  name\n'
-            '  id\n'
-            '}\n'
-            '}}}'
+            "  id\n"
+            "  authors {\n"
+            "  name\n"
+            "  id\n"
+            "}\n"
+            "}}}",
         )
         parse(x)
 
@@ -217,8 +236,8 @@ class Py2GraphqlTests(unittest.TestCase):
         async def task():
             with patch("aiohttp.ClientSession.post") as mocked:
                 mocked.return_value.__aenter__.return_value.status = 200
-                mocked.return_value.__aenter__.return_value.text = CoroutineMock(
-                    return_value=json.dumps(
+                mocked.return_value.__aenter__.return_value.text = create_async_mock(
+                    json.dumps(
                         {"data": {"repository": {"title": "xxx", "url": "example.com"}}}
                     )
                 )
@@ -244,8 +263,8 @@ class Py2GraphqlTests(unittest.TestCase):
             with patch("aiohttp.ClientSession.post") as mocked:
                 ret = ReturnValue
                 ret.status = 200
-                ret.text = CoroutineMock(
-                    return_value=json.dumps(
+                ret.text = create_async_mock(
+                    json.dumps(
                         {"data": {"repository": {"title": "xxx", "url": "example.com"}}}
                     )
                 )

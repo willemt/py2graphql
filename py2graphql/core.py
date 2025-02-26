@@ -1,16 +1,40 @@
+import importlib.util
 import json
 from typing import List
 
-import aiohttp
+# Optional imports
+requests = None
+aiohttp = None
+httpx = None
 
-import requests
+# Try to import HTTP clients
+try:
+    import requests
+except ImportError:
+    pass
 
-from tenacity import retry, stop_after_attempt  # type: ignore
+try:
+    import aiohttp
+except ImportError:
+    pass
+
+try:
+    import httpx
+except ImportError:
+    pass
+
+from tenacity import retry
+from tenacity import stop_after_attempt  # type: ignore
 from tenacity.wait import wait_fixed  # type: ignore
 
-from .exception import GraphQLEndpointError, GraphQLError, ValuesRequiresArgumentsError
+from .exception import GraphQLEndpointError
+from .exception import GraphQLError
+from .exception import ValuesRequiresArgumentsError
 from .serialization import serialize_arg
 from .types import Aliased
+
+
+DEFAULT_TIMEOUT = 25
 
 
 class Query(object):
@@ -31,7 +55,7 @@ class Query(object):
            name (str): Client used for sending queries.
            client: Client used for sending queries.
            parent (Query): Query that calls this query.
-       """
+        """
 
         self._operation_type = operation_type
         self._nodes: List[Query] = []
@@ -184,13 +208,24 @@ class Mutation(Query):
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
 async def do_request_async(url: str, body, headers: dict):
-    timeout = aiohttp.ClientTimeout(total=25)
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            url, data=body, headers=headers, timeout=timeout
-        ) as response:
-            await response.text()
+    if aiohttp:
+        timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url, data=body, headers=headers, timeout=timeout
+            ) as response:
+                await response.text()
+                return response
+    elif httpx:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url, data=body, headers=headers, timeout=DEFAULT_TIMEOUT
+            )
             return response
+    else:
+        raise ImportError(
+            "No async HTTP client available. Please install either 'aiohttp' or 'httpx'."
+        )
 
 
 class Client(object):
@@ -211,7 +246,18 @@ class Client(object):
         return result_dict
 
     def do_request(self, body):
-        return requests.post(self.url, body, headers=self.headers, timeout=25)
+        if httpx:
+            return httpx.post(
+                self.url, data=body, headers=self.headers, timeout=DEFAULT_TIMEOUT
+            )
+        elif requests:
+            return requests.post(
+                self.url, body, headers=self.headers, timeout=DEFAULT_TIMEOUT
+            )
+        else:
+            raise ImportError(
+                "No HTTP client available. Please install either 'requests' or 'httpx'."
+            )
 
     async def do_request_async(self, body):
         return await do_request_async(self.url, body, self.headers)
