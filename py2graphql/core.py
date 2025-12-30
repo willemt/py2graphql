@@ -1,3 +1,11 @@
+from .types import Aliased
+from .serialization import serialize_arg
+from .exception import ValuesRequiresArgumentsError
+from .exception import GraphQLError
+from .exception import GraphQLEndpointError
+from tenacity.wait import wait_fixed  # type: ignore
+from tenacity import stop_after_attempt  # type: ignore
+from tenacity import retry
 import importlib.util
 import json
 from typing import List
@@ -22,16 +30,6 @@ try:
     import httpx
 except ImportError:
     pass
-
-from tenacity import retry
-from tenacity import stop_after_attempt  # type: ignore
-from tenacity.wait import wait_fixed  # type: ignore
-
-from .exception import GraphQLEndpointError
-from .exception import GraphQLError
-from .exception import ValuesRequiresArgumentsError
-from .serialization import serialize_arg
-from .types import Aliased
 
 
 DEFAULT_TIMEOUT = 25
@@ -285,8 +283,16 @@ class Client(object):
 
         r = await self.do_request_async(json.dumps(body))
 
-        status_code = r.status
-        content = await r.text()
+        if aiohttp:
+            status_code = r.status
+            content = await r.text()
+        if httpx:
+            status_code = r.status_code
+            content = r.text
+        else:
+            raise ValueError(
+                "No async HTTP client available. Please install either 'aiohttp' or 'httpx'."
+            )
 
         if status_code != 200:
             raise GraphQLEndpointError(

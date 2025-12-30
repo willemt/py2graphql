@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py2graphql"
-version = "0.21.0"
+version = "0.23.0"
 description = "Pythonic GraphQL Client"
 readme = "README.rst"
 authors = ["Willem Thiart <himself@willemthiart.com>"]
